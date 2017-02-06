@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="income_miss"
+        android:title="@string/misscall" />
+    <PreferenceCategory android:title="@string/group" />
+    <EditTextPreference
+        android:defaultValue="25"
+        android:dependency="income_miss"
+        android:dialogTitle="@string/duration"
+        android:inputType="number"
+        android:key="income_miss_in"
+        android:title="@string/duration" />
+    <EditTextPreference
+        android:defaultValue="1000"
+        android:dependency="income_miss"
+        android:dialogTitle="@string/pause_flash"
+        android:inputType="number"
+        android:key="income_miss_out"
+        android:title="@string/pause_flash" />
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:dependency="income_miss"
+        android:key="income_miss_strobe"
+        android:title="@string/strobe_check" />
+    <EditTextPreference
+        android:defaultValue="10"
+        android:dependency="income_miss_strobe"
+        android:dialogTitle="@string/strobe_count"
+        android:inputType="number"
+        android:key="income_miss_count"
+        android:title="@string/strobe_count" />
+    <EditTextPreference
+        android:defaultValue="1000"
+        android:dependency="income_miss_strobe"
+        android:dialogTitle="@string/strobe_check"
+        android:inputType="number"
+        android:key="income_miss_wait"
+        android:title="@string/strobe_check" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:dependency="income_miss"
+        android:key="income_miss_repeat"
+        android:title="@string/repeat_check" />
+
+</PreferenceScreen>

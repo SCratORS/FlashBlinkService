@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="income_app"
+        android:title="@string/incomeapp" />
+    <PreferenceCategory android:title="@string/group" />
+    <EditTextPreference
+        android:defaultValue="25"
+        android:dependency="income_app"
+        android:dialogTitle="@string/duration"
+        android:inputType="number"
+        android:key="income_app_in"
+        android:title="@string/duration" />
+    <EditTextPreference
+        android:defaultValue="50"
+        android:dependency="income_app"
+        android:dialogTitle="@string/pause_flash"
+        android:inputType="number"
+        android:key="income_app_out"
+        android:title="@string/pause_flash" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:dependency="income_app"
+        android:key="income_app_strobe"
+        android:title="@string/strobe_check" />
+    <EditTextPreference
+        android:defaultValue="3"
+        android:dependency="income_app_strobe"
+        android:dialogTitle="@string/strobe_count"
+        android:inputType="number"
+        android:key="income_app_count"
+        android:title="@string/strobe_count" />
+    <EditTextPreference
+        android:defaultValue="500"
+        android:dependency="income_app_strobe"
+        android:dialogTitle="@string/strobe_check"
+        android:inputType="number"
+        android:key="income_app_wait"
+        android:title="@string/strobe_check" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:dependency="income_app"
+        android:key="income_app_repeat"
+        android:title="@string/repeat_check" />
+    <PreferenceScreen
+        android:dependency="income_app"
+        android:key="income_app_select"
+        android:title="@string/select_incomeapp">
+        <PreferenceCategory android:title="@string/group_app" />
+    </PreferenceScreen>
+</PreferenceScreen>

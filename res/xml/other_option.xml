@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="safe_mode"
+        android:summary="@string/safe_mode_summary"
+        android:title="@string/safe_mode" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="sleep_mode"
+        android:summary="@string/sleep_mode_summary"
+        android:title="@string/sleep_mode" />
+</PreferenceScreen>

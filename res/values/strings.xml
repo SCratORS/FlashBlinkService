@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FlashBlinkService</string>
+    <string name="accessibility_service_description">Сервис, который запускает вспышку аппарата при наступлении различных уведомлений. Данное программное обеспечение является OpenSources и распространяется по лицензии GPL-3.0. Исходный код доступен по адресу https://github.com/SCratORS/FlashBlinkService</string>
+    <string name="incomecall">Входящие звонки</string>
+    <string name="incomesms">Входящие сообщения</string>
+    <string name="incomeapp">Уведомления приложений</string>
+    <string name="select_incomeapp">Выбрать приложения</string>
+    <string name="sleep_mode">Режим сна</string>
+    <string name="sleep_mode_summary">Не активировать вспышку ночью с 23.00 до 6.00</string>
+    <string name="safe_mode">Энергосбережение</string>
+    <string name="safe_mode_summary">Не активировать вспышку в режиме системного энергосбережения</string>
+    <string name="incomealarm">Будильник</string>
+    <string name="duration">Длительность включенной вспышки</string>
+    <string name="pause_flash">Задержка между включениями</string>
+    <string name="load_app_info">Загрузка информации об установленных приложениях</string>
+    <string name="strobe_check">Пауза между сериями вспышек</string>
+    <string name="strobe_count">Количество вспышек в серии</string>
+    <string name="misscall">Пропущенные звонки</string>
+    <string name="group_general">Общие настройки</string>
+    <string name="group">Настройки схемы</string>
+    <string name="group_app">Установленные приложения</string>
+    <string name="msec">мсек.</string>
+    <string name="repeat_check">Повторять серии вспышек</string>
+</resources>

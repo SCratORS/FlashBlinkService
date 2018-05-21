@@ -35,12 +35,16 @@ Unique application numbers: Certain services include a unique application number
 
 FLASHLIGHT
     - The service only use this permission control flashlight, we will not take photo and record video.
+    
 READ_PHONE_STATE
     - The service only check phone state, it will not collect any information from your device.
+    
 RECEIVE_SMS
     - The service only check the moment when receive SMS or MMS, it will not access message content, and will not collect any information via this permission.
+    
 BATTERY_STATS
     - The service checks only the moment when the battery enters the power saving mode and exits it.
+    
 WAKE_LOCK
     - The service that allows the processor to exit sleep mode, only to get the correct gyro readings, it will not collect any information via this permission.
 

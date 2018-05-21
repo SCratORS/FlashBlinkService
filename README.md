@@ -1,5 +1,5 @@
-# FlashBlinkService
-Flash notification
+# FlashBlink Service & SC app
+Free Flash notification
 
 
 # Private Police
@@ -34,7 +34,7 @@ Unique application numbers: Certain services include a unique application number
 
 # Android Permissions
 
-FLASHLIGHT
+FLASHLIGHT & CAMERA
     - The service only use this permission control flashlight, we will not take photo and record video.
     
 READ_PHONE_STATE

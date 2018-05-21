@@ -2,6 +2,7 @@
 Flash notification
 
 
+# Private Police
 # Terms & Privacy
 
 FlashBlinkService is a free app. This service is provided by {SCrat_ORS} at no cost and is intended for use as is.

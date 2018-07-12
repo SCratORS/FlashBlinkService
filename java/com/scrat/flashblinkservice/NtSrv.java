@@ -41,15 +41,17 @@ public class NtSrv extends AccessibilityService {
         intentFilters.addAction("android.intent.action.PHONE_STATE");
         intentFilters.addAction("android.provider.Telephony.SMS_RECEIVED");
 
-        intentFilters.addAction("com.htc.worldclock.ALARM_ALERT");
+        intentFilters.addAction("com.android.deskclock.ALARM_ALERT");
+        intentFilters.addAction("com.android.alarmclock.ALARM_ALERT");
+        intentFilters.addAction("com.htc.worldclock.ALARM_ALERT"); //HTC Работает проверено.
         intentFilters.addAction("com.sonyericsson.alarm.ALARM_ALERT");
         intentFilters.addAction("com.samsung.sec.android.clockpackage.alarm.ALARM_ALERT");
-        intentFilters.addAction("com.htc.android.worldclock.ALARM_ALERT");
         intentFilters.addAction("zte.com.cn.alarmclock.ALARM_ALERT");
         intentFilters.addAction("com.motorola.blur.alarmclock.ALARM_ALERT");
         intentFilters.addAction("com.urbandroid.sleep.alarmclock.ALARM_ALERT");
         intentFilters.addAction("com.splunchy.android.alarmclock.ALARM_ALERT");
         intentFilters.addAction("com.lge.clock.alarmclock");
+        intentFilters.addAction("com.tplink.tpclock.ALARM_ALERT"); //TP-LINK Работает проверено.
 
         intentFilters.addAction("android.intent.action.ACTION_BATTERY_LOW");
         intentFilters.addAction("android.intent.action.ACTION_BATTERY_OKAY");

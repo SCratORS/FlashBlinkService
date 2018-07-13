@@ -13,6 +13,5 @@
     <PreferenceScreen
         android:key="logs_screen"
         android:title="@string/logs">
-        <PreferenceCategory android:title="@string/group_logs" />
     </PreferenceScreen>
 </PreferenceScreen>

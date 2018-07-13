@@ -21,7 +21,6 @@ import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 public class StAct extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     private String setPreference;
     private List<ApplicationInfo> appList;
-    private List<ContentValues> logList;
     private PreferenceScreen SelectAppScreen;
     private PreferenceScreen LogsScreen;
     private SqlHlp dbHelper;
@@ -78,7 +77,6 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
         SelectAppScreen = null;
         LogsScreen = null;
         appList = null;
-        logList = null;
         setPreference = null;
         dbHelper = null;
     }
@@ -156,7 +154,7 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
     private class LoadLogsInfo extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... params) {
-            logList = dbHelper.getRecord();
+            List<ContentValues> logList = dbHelper.getRecord();
             for (ContentValues cVal : logList) {
                 Preference psc = new Preference(getContext());
                 psc.setTitle(cVal.getAsString("intent"));
@@ -168,7 +166,6 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
 
         @Override
         protected void onPostExecute(Void result) {
-            logList.clear();
             super.onPostExecute(result);
         }
 

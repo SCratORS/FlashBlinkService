@@ -73,8 +73,8 @@ public class NtSrv extends AccessibilityService {
         intentFilters.addAction("com.lge.clock.alarmclock");
         intentFilters.addAction("com.tplink.tpclock.ALARM_ALERT"); //TP-LINK Работает проверено.
 
-        intentFilters.addAction("android.intent.action.ACTION_BATTERY_LOW");
-        intentFilters.addAction("android.intent.action.ACTION_BATTERY_OKAY");
+        intentFilters.addAction("android.intent.action.BATTERY_LOW");
+        intentFilters.addAction("android.intent.action.BATTERY_OKAY");
         intentFilters.setPriority(0);
 
         registerReceiver(new BroadcastReceiver() {

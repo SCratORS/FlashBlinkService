@@ -50,16 +50,18 @@ class SqlHlp extends SQLiteOpenHelper {
 
     public List<ContentValues> getRecord() {
         SQLiteDatabase db = this.getReadableDatabase();
-        ContentValues cVal = new ContentValues();
+        ContentValues cVal;
         List<ContentValues> list = new ArrayList<>();
-        Cursor c = db.query("logsTable", null, null, null, null, null, "id DESC LIMIT 10");
+        Cursor c = db.query("logsTable", null, null, null, null, null, null);
         int dateColIndex = c.getColumnIndex("dta");
         int intentColIndex = c.getColumnIndex("intent");
-        while (c.moveToNext()) {
-            cVal.clear();
-            cVal.put("intent", c.getString(intentColIndex));
-            cVal.put("dta", c.getString(dateColIndex));
-            list.add(cVal);
+        if (c.moveToFirst()) {
+            do {
+                cVal = new ContentValues();
+                cVal.put("intent", c.getString(intentColIndex));
+                cVal.put("dta", c.getString(dateColIndex));
+                list.add(cVal);
+            } while (c.moveToNext());
         }
         c.close();
         db.close();

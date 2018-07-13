@@ -22,4 +22,5 @@
     <string name="group_app">Установленные приложения</string>
     <string name="msec">мсек.</string>
     <string name="repeat_check">Повторять серии вспышек</string>
+    <string name="logs">Журнал уведомлений</string>
 </resources>

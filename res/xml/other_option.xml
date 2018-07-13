@@ -10,4 +10,9 @@
         android:key="sleep_mode"
         android:summary="@string/sleep_mode_summary"
         android:title="@string/sleep_mode" />
+    <PreferenceScreen
+        android:key="logs_screen"
+        android:title="@string/logs">
+        <PreferenceCategory android:title="@string/group_logs" />
+    </PreferenceScreen>
 </PreferenceScreen>

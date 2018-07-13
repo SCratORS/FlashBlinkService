@@ -1,12 +1,12 @@
 package com.scrat.flashblinkservice;
 
 import android.accessibilityservice.AccessibilityService;
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.sqlite.SQLiteDatabase;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
 import android.os.AsyncTask;
@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
@@ -29,8 +30,13 @@ public class NtSrv extends AccessibilityService {
     private SqlHlp dbHelper;
 
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
-        if (getValue(accessibilityEvent.getPackageName().toString(), false))
+        if (getValue(accessibilityEvent.getPackageName().toString(), false)) {
+            ContentValues cVal = new ContentValues();
+            cVal.put("intent", accessibilityEvent.getPackageName().toString());
+            cVal.put("dta", getDateTime());
+            dbHelper.post(cVal);
             StartFlash("income_app");
+        }
     }
 
     public void onInterrupt() {
@@ -74,14 +80,12 @@ public class NtSrv extends AccessibilityService {
         registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                SQLiteDatabase db = dbHelper.getWritableDatabase();
-                ContentValues cv = new ContentValues();
-                cv.put("intent", intent.getAction());
-                cv.put("dta", getDateTime());
-                db.insert("logsTable", null, cv);
-                db.close();
+                ContentValues cVal = new ContentValues();
+                cVal.put("intent", intent.getAction());
+                cVal.put("dta", getDateTime());
+                dbHelper.post(cVal);
 
-                if (intent.getAction().endsWith(".PHONE_STATE")) {
+                if (Objects.requireNonNull(intent.getAction()).endsWith(".PHONE_STATE")) {
                     String phoneState = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
                     if (phoneState.equals(TelephonyManager.EXTRA_STATE_RINGING))
                          StartFlash("income_call");
@@ -152,6 +156,7 @@ public class NtSrv extends AccessibilityService {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class Flashing extends AsyncTask<Integer, Void, Void> {
         private final long timeshtamp = System.currentTimeMillis();
 

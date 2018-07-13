@@ -57,7 +57,7 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
         if (LogsScreen != null) {
             LogsScreen.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 public boolean onPreferenceClick(Preference preference) {
-                        new LoadLogsInfo().execute();
+                    new LoadLogsInfo().execute();
                     return true;
                 }
             });

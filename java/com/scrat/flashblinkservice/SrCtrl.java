@@ -10,6 +10,8 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.PowerManager;
 
+import java.util.Objects;
+
 class SrCtrl implements SensorEventListener {
     private final String TAG = "FlashBlinkService.SensorControl";
     private final Context context;
@@ -46,6 +48,7 @@ class SrCtrl implements SensorEventListener {
     private void initialized_sensor() {
         ensureHandler();
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+        assert sensorManager != null;
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL, mHandler);
     }
 
@@ -53,8 +56,9 @@ class SrCtrl implements SensorEventListener {
         if (mHandler != null) return faceDown;
         else {
             PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-            wl.acquire();
+            assert pm != null;
+            wl = Objects.requireNonNull(pm).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+            wl.acquire(60 * 1000L /*1 minutes*/);
             initialized_sensor();
             try {
                 Thread.sleep(500);

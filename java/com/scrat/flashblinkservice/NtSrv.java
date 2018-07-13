@@ -88,14 +88,14 @@ public class NtSrv extends AccessibilityService {
                 if (Objects.requireNonNull(intent.getAction()).endsWith(".PHONE_STATE")) {
                     String phoneState = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
                     if (phoneState.equals(TelephonyManager.EXTRA_STATE_RINGING))
-                         StartFlash("income_call");
+                        StartFlash("income_call");
                     else {
                         flashblink = false;
                         if (phoneState.equals(TelephonyManager.EXTRA_STATE_IDLE))
-                           StartFlash("income_miss");
+                            StartFlash("income_miss");
                     }
                 } else if (intent.getAction().endsWith(".SMS_RECEIVED")) StartFlash("income_sms");
-                else if (intent.getAction().endsWith(".ALARM_ALERT"))StartFlash("income_alarm");
+                else if (intent.getAction().endsWith(".ALARM_ALERT")) StartFlash("income_alarm");
                 else bat_lev = intent.getAction().endsWith("LOW");
 
             }

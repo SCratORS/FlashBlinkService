@@ -9,20 +9,22 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SqlHlp extends SQLiteOpenHelper {
+class SqlHlp extends SQLiteOpenHelper {
     SqlHlp(Context context) {
         super(context, "logsDB", null, 1);
     }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table logsTable ("
-                    + "id integer primary key autoincrement,"
-                    + "dta datetime,"
-                    + "intent text" + ");");
+                + "id integer primary key autoincrement,"
+                + "dta datetime,"
+                + "intent text" + ");");
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    }
 
     public void post(ContentValues cVal) {
         if (this.count() > 10) this.clear();
@@ -31,9 +33,9 @@ public class SqlHlp extends SQLiteOpenHelper {
         db.close();
     }
 
-    private void clear(){
+    private void clear() {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete("logsTable", null,null);
+        db.delete("logsTable", null, null);
         db.close();
     }
 
@@ -53,10 +55,10 @@ public class SqlHlp extends SQLiteOpenHelper {
         Cursor c = db.query("logsTable", null, null, null, null, null, "id DESC LIMIT 10");
         int dateColIndex = c.getColumnIndex("dta");
         int intentColIndex = c.getColumnIndex("intent");
-        while(c.moveToNext()) {
+        while (c.moveToNext()) {
             cVal.clear();
-            cVal.put("intent",c.getString(intentColIndex));
-            cVal.put("dta",c.getString(dateColIndex));
+            cVal.put("intent", c.getString(intentColIndex));
+            cVal.put("dta", c.getString(dateColIndex));
             list.add(cVal);
         }
         c.close();

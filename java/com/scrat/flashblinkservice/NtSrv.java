@@ -2,16 +2,21 @@ package com.scrat.flashblinkservice;
 
 import android.accessibilityservice.AccessibilityService;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.sqlite.SQLiteDatabase;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
 import android.os.AsyncTask;
 import android.telephony.TelephonyManager;
 import android.view.accessibility.AccessibilityEvent;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
@@ -21,6 +26,7 @@ public class NtSrv extends AccessibilityService {
     private Flashing flashing;
     private boolean flashblink;
     private boolean bat_lev;
+    private SqlHlp dbHelper;
 
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
         if (getValue(accessibilityEvent.getPackageName().toString(), false))
@@ -35,8 +41,16 @@ public class NtSrv extends AccessibilityService {
         System.exit(0);
     }
 
+    private String getDateTime() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        Date date = new Date();
+        return dateFormat.format(date);
+    }
+
     public void onServiceConnected() {
         isFaceDown = new SrCtrl(getApplicationContext());
+        dbHelper = new SqlHlp(getApplicationContext());
         IntentFilter intentFilters = new IntentFilter();
         intentFilters.addAction("android.intent.action.PHONE_STATE");
         intentFilters.addAction("android.provider.Telephony.SMS_RECEIVED");
@@ -60,18 +74,26 @@ public class NtSrv extends AccessibilityService {
         registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                ContentValues cv = new ContentValues();
+                cv.put("intent", intent.getAction());
+                cv.put("dta", getDateTime());
+                db.insert("logsTable", null, cv);
+                db.close();
+
                 if (intent.getAction().endsWith(".PHONE_STATE")) {
                     String phoneState = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
                     if (phoneState.equals(TelephonyManager.EXTRA_STATE_RINGING))
-                        StartFlash("income_call");
+                         StartFlash("income_call");
                     else {
                         flashblink = false;
                         if (phoneState.equals(TelephonyManager.EXTRA_STATE_IDLE))
-                            StartFlash("income_miss");
+                           StartFlash("income_miss");
                     }
                 } else if (intent.getAction().endsWith(".SMS_RECEIVED")) StartFlash("income_sms");
-                else if (intent.getAction().endsWith(".ALARM_ALERT")) StartFlash("income_alarm");
+                else if (intent.getAction().endsWith(".ALARM_ALERT"))StartFlash("income_alarm");
                 else bat_lev = intent.getAction().endsWith("LOW");
+
             }
         }, intentFilters);
     }

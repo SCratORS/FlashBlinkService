@@ -4,6 +4,8 @@ import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
@@ -20,6 +22,8 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
     private String setPreference;
     private List<ApplicationInfo> appList;
     private PreferenceScreen SelectAppScreen;
+    private PreferenceScreen LogsScreen;
+    private SqlHlp dbHelper;
 
     private int getResourceId(String pVariableName) {
         try {
@@ -33,6 +37,7 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dbHelper = new SqlHlp(getContext());
         setPreference = getArguments().getString("start");
         addPreferencesFromResource(getResourceId(setPreference));
         SelectAppScreen = (PreferenceScreen) findPreference("income_app_select");
@@ -42,6 +47,16 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
                     if (appList == null) {
                         new LoadApplications().execute();
                     }
+                    return true;
+                }
+            });
+
+        }
+        LogsScreen = (PreferenceScreen) findPreference("logs_screen");
+        if (LogsScreen != null) {
+            LogsScreen.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                public boolean onPreferenceClick(Preference preference) {
+                        new LoadLogsInfo().execute();
                     return true;
                 }
             });
@@ -60,8 +75,10 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
     public void onDestroy() {
         super.onDestroy();
         SelectAppScreen = null;
+        LogsScreen = null;
         appList = null;
         setPreference = null;
+        dbHelper = null;
     }
 
     @Override
@@ -132,4 +149,34 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
         }
     }
 
+    private class LoadLogsInfo extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
+            Cursor c = db.query("logsTable", null, null, null, null, null, "id DESC LIMIT 10");
+            int dateColIndex = c.getColumnIndex("dta");
+            int intentColIndex = c.getColumnIndex("intent");
+            while(c.moveToNext()) {
+                Preference psc = new Preference(getContext());
+                psc.setTitle(c.getString(intentColIndex));
+                psc.setSummary(c.getString(dateColIndex));
+                LogsScreen.addPreference(psc);
+            }
+            c.close();
+            db.close();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            LogsScreen.removeAll();
+            super.onPreExecute();
+        }
+    }
 }
+

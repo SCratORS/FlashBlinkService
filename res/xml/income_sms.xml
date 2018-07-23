@@ -3,47 +3,52 @@
     <SwitchPreference
         android:defaultValue="false"
         android:key="income_sms"
+        android:icon="@drawable/ic_sms"
+        android:layout="@layout/sw_p_l"
         android:title="@string/incomesms" />
-    <PreferenceCategory
-        android:key="sms_key"
-        android:title="@string/group">
-        <EditTextPreference
-            android:defaultValue="10"
-            android:dependency="income_sms"
-            android:dialogTitle="@string/duration"
-            android:inputType="number"
-            android:key="income_sms_in"
-            android:title="@string/duration" />
-        <EditTextPreference
-            android:defaultValue="500"
-            android:dependency="income_sms"
-            android:dialogTitle="@string/pause_flash"
-            android:inputType="number"
-            android:key="income_sms_out"
-            android:title="@string/pause_flash" />
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:dependency="income_sms"
-            android:key="income_sms_strobe"
-            android:title="@string/strobe_check" />
-        <EditTextPreference
-            android:defaultValue="10"
-            android:dependency="income_sms_strobe"
-            android:dialogTitle="@string/strobe_count"
-            android:inputType="number"
-            android:key="income_sms_count"
-            android:title="@string/strobe_count" />
-        <EditTextPreference
-            android:defaultValue="50"
-            android:dependency="income_sms_strobe"
-            android:dialogTitle="@string/strobe_check"
-            android:inputType="number"
-            android:key="income_sms_wait"
-            android:title="@string/strobe_check" />
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:dependency="income_sms"
-            android:key="income_sms_repeat"
-            android:title="@string/repeat_check" />
-    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/group" android:layout="@layout/gr_p_l"/>
+    <EditTextPreference
+        android:defaultValue="10"
+        android:dependency="income_sms"
+        android:dialogTitle="@string/duration"
+        android:inputType="number"
+        android:key="income_sms_in"
+        android:layout="@layout/sc_p_l"
+        android:title="@string/duration" />
+    <EditTextPreference
+        android:defaultValue="500"
+        android:dependency="income_sms"
+        android:dialogTitle="@string/pause_flash"
+        android:inputType="number"
+        android:key="income_sms_out"
+        android:layout="@layout/sc_p_l"
+        android:title="@string/pause_flash" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:dependency="income_sms"
+        android:key="income_sms_strobe"
+        android:layout="@layout/sw_p_l"
+        android:title="@string/strobe_check" />
+    <EditTextPreference
+        android:defaultValue="10"
+        android:dependency="income_sms_strobe"
+        android:dialogTitle="@string/strobe_count"
+        android:inputType="number"
+        android:key="income_sms_count"
+        android:layout="@layout/sc_p_l"
+        android:title="@string/strobe_count" />
+    <EditTextPreference
+        android:defaultValue="50"
+        android:dependency="income_sms_strobe"
+        android:dialogTitle="@string/strobe_check"
+        android:inputType="number"
+        android:key="income_sms_wait"
+        android:layout="@layout/sc_p_l"
+        android:title="@string/strobe_check" />
+    <SwitchPreference
+        android:defaultValue="true"
+        android:dependency="income_sms"
+        android:key="income_sms_repeat"
+        android:layout="@layout/sw_p_l"
+        android:title="@string/repeat_check" />
 </PreferenceScreen>

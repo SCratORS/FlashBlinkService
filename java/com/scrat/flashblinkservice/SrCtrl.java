@@ -20,6 +20,7 @@ class SrCtrl implements SensorEventListener {
     private Handler mHandler;
     private Looper mHandlerLooper;
     private boolean faceDown;
+    private boolean invert;
 
     SrCtrl(Context cntx) {
         context = cntx;
@@ -45,6 +46,10 @@ class SrCtrl implements SensorEventListener {
         mHandler = null;
     }
 
+    public void addWakeTime() {
+        if (wl != null)  wl.acquire(300 * 1000L /*5 minutes*/);
+    }
+
     private void initialized_sensor() {
         ensureHandler();
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
@@ -52,18 +57,18 @@ class SrCtrl implements SensorEventListener {
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL, mHandler);
     }
 
-    boolean isFacedown() {
+    boolean isFacedown(boolean Invert) {
+        invert = Invert;
         if (mHandler != null) return faceDown;
         else {
             PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
             assert pm != null;
             wl = Objects.requireNonNull(pm).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-            wl.acquire(60 * 1000L /*1 minutes*/);
+            addWakeTime();
             initialized_sensor();
             try {
                 Thread.sleep(500);
-            } catch (InterruptedException ignored) {
-            }
+            } catch (InterruptedException ignored) { }
             return faceDown;
         }
     }
@@ -73,9 +78,7 @@ class SrCtrl implements SensorEventListener {
     }
 
     @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-        faceDown = sensorEvent.values[2] < 0;
-    }
+    public void onSensorChanged(SensorEvent sensorEvent) { faceDown = sensorEvent.values[2] < 0 != invert; }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {

@@ -27,32 +27,19 @@ class SqlHlp extends SQLiteOpenHelper {
     }
 
     public void post(ContentValues cVal) {
-        if (this.count() > 10) this.clear();
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.insert("logsTable", null, cVal);
-        db.close();
-    }
-
-    private void clear() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete("logsTable", null, null);
-        db.close();
-    }
-
-    private long count() {
         SQLiteDatabase db = this.getReadableDatabase();
-        long recordsCount;
         Cursor c = db.query("logsTable", null, null, null, null, null, null);
-        recordsCount = c.getCount();
+        if (c.moveToFirst() && (c.getCount() > 50)) db.delete("logsTable", "id="+c.getInt(c.getColumnIndex("id")), null);
+        db.insert("logsTable", null, cVal);
         c.close();
-        return recordsCount;
+        db.close();
     }
 
     public List<ContentValues> getRecord() {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues cVal;
         List<ContentValues> list = new ArrayList<>();
-        Cursor c = db.query("logsTable", null, null, null, null, null, null);
+        Cursor c = db.query("logsTable", null, null, null, null, null, "id DESC");
         int dateColIndex = c.getColumnIndex("dta");
         int intentColIndex = c.getColumnIndex("intent");
         if (c.moveToFirst()) {

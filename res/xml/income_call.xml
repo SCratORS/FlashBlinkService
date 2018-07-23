@@ -3,14 +3,17 @@
     <SwitchPreference
         android:defaultValue="false"
         android:key="income_call"
+        android:icon="@drawable/ic_phi"
+        android:layout="@layout/sw_p_l"
         android:title="@string/incomecall" />
-    <PreferenceCategory android:title="@string/group" />
+    <PreferenceCategory android:title="@string/group" android:layout="@layout/gr_p_l"/>
     <EditTextPreference
         android:defaultValue="25"
         android:dependency="income_call"
         android:dialogTitle="@string/duration"
         android:inputType="number"
         android:key="income_call_in"
+        android:layout="@layout/sc_p_l"
         android:title="@string/duration" />
     <EditTextPreference
         android:defaultValue="50"
@@ -18,11 +21,13 @@
         android:dialogTitle="@string/pause_flash"
         android:inputType="number"
         android:key="income_call_out"
+        android:layout="@layout/sc_p_l"
         android:title="@string/pause_flash" />
-    <CheckBoxPreference
+    <SwitchPreference
         android:defaultValue="true"
         android:dependency="income_call"
         android:key="income_call_strobe"
+        android:layout="@layout/sw_p_l"
         android:title="@string/strobe_check" />
     <EditTextPreference
         android:defaultValue="10"
@@ -30,6 +35,7 @@
         android:dialogTitle="@string/strobe_count"
         android:inputType="number"
         android:key="income_call_count"
+        android:layout="@layout/sc_p_l"
         android:title="@string/strobe_count" />
     <EditTextPreference
         android:defaultValue="1000"
@@ -37,10 +43,12 @@
         android:dialogTitle="@string/strobe_check"
         android:inputType="number"
         android:key="income_call_wait"
+        android:layout="@layout/sc_p_l"
         android:title="@string/strobe_check" />
-    <CheckBoxPreference
+    <SwitchPreference
         android:defaultValue="true"
         android:dependency="income_call"
         android:key="income_call_repeat"
+        android:layout="@layout/sw_p_l"
         android:title="@string/repeat_check" />
 </PreferenceScreen>

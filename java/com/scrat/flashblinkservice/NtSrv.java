@@ -7,12 +7,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
 import android.os.AsyncTask;
 import android.telephony.TelephonyManager;
 import android.view.accessibility.AccessibilityEvent;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -24,9 +22,11 @@ import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 public class NtSrv extends AccessibilityService {
     private SrCtrl isFaceDown;
     private CameraManager mCameraManager;
-    private Flashing flashing;
+    private volatile Flashing flashing;
     private boolean flashblink;
     private boolean bat_lev;
+    private boolean acl_invert;
+    private int camId;
     private SqlHlp dbHelper;
 
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
@@ -49,7 +49,7 @@ public class NtSrv extends AccessibilityService {
 
     private String getDateTime() {
         SimpleDateFormat dateFormat = new SimpleDateFormat(
-                "yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                "dd MMMM HH:mm:ss", Locale.getDefault());
         Date date = new Date();
         return dateFormat.format(date);
     }
@@ -83,21 +83,23 @@ public class NtSrv extends AccessibilityService {
                 ContentValues cVal = new ContentValues();
                 cVal.put("intent", intent.getAction());
                 cVal.put("dta", getDateTime());
-                dbHelper.post(cVal);
 
                 if (Objects.requireNonNull(intent.getAction()).endsWith(".PHONE_STATE")) {
                     String phoneState = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
-                    if (phoneState.equals(TelephonyManager.EXTRA_STATE_RINGING))
+                    if (phoneState.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
+                        cVal.put("intent", cVal.getAsString("intent").concat(" (").concat(phoneState).concat(")"));
                         StartFlash("income_call");
-                    else {
+                    } else {
                         flashblink = false;
-                        if (phoneState.equals(TelephonyManager.EXTRA_STATE_IDLE))
+                        if (phoneState.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
+                            cVal.put("intent", cVal.getAsString("intent").concat(" (").concat(phoneState).concat(")"));
                             StartFlash("income_miss");
+                        }
                     }
                 } else if (intent.getAction().endsWith(".SMS_RECEIVED")) StartFlash("income_sms");
                 else if (intent.getAction().endsWith(".ALARM_ALERT")) StartFlash("income_alarm");
                 else bat_lev = intent.getAction().endsWith("LOW");
-
+                dbHelper.post(cVal);
             }
         }, intentFilters);
     }
@@ -117,9 +119,9 @@ public class NtSrv extends AccessibilityService {
 
     private boolean setFlashlight(boolean enabled) {
         try {
-            if (mCameraManager != null) mCameraManager.setTorchMode("0", enabled);
+            if (mCameraManager != null) mCameraManager.setTorchMode(String.valueOf(camId), enabled);
             return true;
-        } catch (CameraAccessException e) {
+        } catch (Exception e) {
             return false;
         }
     }
@@ -138,7 +140,9 @@ public class NtSrv extends AccessibilityService {
 
     private void StartFlash(String event) {
         if (getValue(event, false)) {
-            if (flashing != null) flashing.cancel(true);
+            acl_invert = getValue("invert_mode", false);
+            camId = getValue("other_option_camera_id_list" , "-1");
+            if (camId < 0) return;
             boolean battery = !getValue("safe_mode", true) || !bat_lev;
             int mHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
             boolean sleepTimes = !getValue("sleep_mode", true) || (5 < mHour && mHour < 23);
@@ -150,22 +154,28 @@ public class NtSrv extends AccessibilityService {
                 ArrayParam[3] = getValue(event.concat("_count"), "10");
                 ArrayParam[4] = getValue(event.concat("_wait"), "1000");
                 ArrayParam[5] = getValue(event.concat("_repeat"), true) ? 1 : 0;
-                flashing = new Flashing();
-                flashing.execute((Integer[]) ArrayParam);
+                if (flashing != null) flashing.SetParam((Integer[]) ArrayParam); else {
+                    flashing = new Flashing();
+                    flashing.execute((Integer[]) ArrayParam);
+                }
             }
         }
     }
 
     @SuppressLint("StaticFieldLeak")
     private class Flashing extends AsyncTask<Integer, Void, Void> {
-        private final long timeshtamp = System.currentTimeMillis();
+        private long timeshtamp = System.currentTimeMillis();
+        private Integer[] Scheme = new Integer[6];
+
+        void SetParam(Integer... arrInteger) {
+            timeshtamp = System.currentTimeMillis();
+            Scheme = arrInteger;
+            isFaceDown.addWakeTime();
+        }
 
         private void SleepTime(int t) {
-            if (!(isCancelled() || !flashblink))
-                try {
-                    Thread.sleep(t);
-                } catch (InterruptedException ignored) {
-                }
+            long setCurrentMillis = System.currentTimeMillis() + t;
+            while (!(isCancelled() || !flashblink) && (System.currentTimeMillis() < setCurrentMillis));
         }
 
         private void blink(int i, int o) {
@@ -180,21 +190,21 @@ public class NtSrv extends AccessibilityService {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            if (flashblink) CameraRelease();
             flashblink = FlashlightInitialized();
         }
 
         @Override
         protected Void doInBackground(Integer... arrInteger) {
-            while (isNotStopFlash() && isFaceDown.isFacedown()) {
-                if (arrInteger[2] != 0) {
-                    for (int i = 0; i < arrInteger[3]; i++) {
-                        if (isNotStopFlash()) blink(arrInteger[0], arrInteger[1]);
+            Scheme = arrInteger;
+            while (isNotStopFlash() && isFaceDown.isFacedown(acl_invert)) {
+                if (Scheme[2] != 0) {
+                    for (int i = 0; i < Scheme[3]; i++) {
+                        if (isNotStopFlash()) blink(Scheme[0], Scheme[1]);
                         else return null;
                     }
-                    if (isNotStopFlash()) SleepTime(arrInteger[4]);
-                } else blink(arrInteger[0], arrInteger[1]);
-                if (arrInteger[5] == 0) return null;
+                    if (isNotStopFlash()) SleepTime(Scheme[4]);
+                } else blink(Scheme[0], Scheme[1]);
+                if (Scheme[5] == 0) return null;
             }
             return null;
         }

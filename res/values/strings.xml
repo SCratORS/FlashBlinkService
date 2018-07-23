@@ -9,7 +9,7 @@
     <string name="sleep_mode">Режим сна</string>
     <string name="sleep_mode_summary">Не активировать вспышку ночью с 23.00 до 6.00</string>
     <string name="safe_mode">Энергосбережение</string>
-    <string name="safe_mode_summary">Не активировать вспышку в режиме системного энергосбережения</string>
+    <string name="safe_mode_summary">Не активировать вспышку при низком заряде АКБ</string>
     <string name="incomealarm">Будильник</string>
     <string name="duration">Длительность включенной вспышки</string>
     <string name="pause_flash">Задержка между включениями</string>
@@ -23,4 +23,13 @@
     <string name="msec">мсек.</string>
     <string name="repeat_check">Повторять серии вспышек</string>
     <string name="logs">Журнал уведомлений</string>
+    <string name="group_logs">Последние уведомления</string>
+    <string name="default_item">Не используется</string>
+    <string name="front_flashlight">Передняя камера</string>
+    <string name="back_flashlight">Задняя камера</string>
+    <string name="external_flashlight">Внешняя камера</string>
+    <string name="flash_title">Вспышка</string>
+    <string name="invert_mode">Инвертирование акселерометра</string>
+    <string name="invert_mode_summary">Экраном вниз или экраном вверх</string>
+    <string name="flash_group">Настройки работы вспышки</string>
 </resources>

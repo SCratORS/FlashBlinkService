@@ -3,19 +3,28 @@ package com.scrat.flashblinkservice;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import static android.hardware.camera2.CameraCharacteristics.*;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 public class StAct extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -23,7 +32,6 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
     private List<ApplicationInfo> appList;
     private PreferenceScreen SelectAppScreen;
     private PreferenceScreen LogsScreen;
-    private SqlHlp dbHelper;
 
     private int getResourceId(String pVariableName) {
         try {
@@ -37,32 +45,71 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        dbHelper = new SqlHlp(getContext());
         setPreference = getArguments().getString("start");
         addPreferencesFromResource(getResourceId(setPreference));
-        SelectAppScreen = (PreferenceScreen) findPreference("income_app_select");
-        if (SelectAppScreen != null) {
-            SelectAppScreen.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                public boolean onPreferenceClick(Preference preference) {
-                    if (appList == null) {
-                        new LoadApplications().execute();
+        if (setPreference.equals("income_app")) {
+            SelectAppScreen = (PreferenceScreen) findPreference("income_app_select");
+            if (SelectAppScreen != null) {
+                SelectAppScreen.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference preference) {
+                        if (appList == null) {
+                            new LoadApplications().execute();
+                        }
+                        return true;
                     }
-                    return true;
-                }
-            });
+                });
 
+            }
         }
-        LogsScreen = (PreferenceScreen) findPreference("logs_screen");
-        if (LogsScreen != null) {
-            LogsScreen.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                public boolean onPreferenceClick(Preference preference) {
-                    new LoadLogsInfo().execute();
-                    return true;
+        if (setPreference.equals("other_option")) {
+            List<String> cameraName = new ArrayList<>();
+            List<String> cameraId   = new ArrayList<>();
+            cameraName.add(getString(R.string.default_item));
+            cameraId.add("-1");
+            CameraManager mCameraManager = (CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE);
+            assert mCameraManager != null;
+            try {
+                String[] ids = mCameraManager.getCameraIdList();
+                for (String id : ids) {
+                    CameraCharacteristics c = mCameraManager.getCameraCharacteristics(id);
+                    if (Objects.requireNonNull(c.get(FLASH_INFO_AVAILABLE))) {
+                        cameraId.add(id);
+                        switch (Objects.requireNonNull(c.get(LENS_FACING))) {
+                            case LENS_FACING_BACK : cameraName.add(getString(R.string.back_flashlight));
+                                break;
+                            case LENS_FACING_FRONT : cameraName.add(getString(R.string.front_flashlight));
+                                break;
+                            case LENS_FACING_EXTERNAL : cameraName.add(getString(R.string.external_flashlight));
+                                break;
+                        }
+                    }
                 }
-            });
+            } catch (CameraAccessException e) {
+                e.printStackTrace();
+            }
 
+            ListPreference SelectFlashlightScreen = (ListPreference) findPreference("other_option_camera_id_list");
+            String[] camNamesArray = new String[cameraName.size()];
+            camNamesArray = cameraName.toArray(camNamesArray);
+            String[] CamIdArray = new String[cameraId.size()];
+            CamIdArray = cameraId.toArray(CamIdArray);
+            SelectFlashlightScreen.setEntries(camNamesArray);
+            SelectFlashlightScreen.setEntryValues(CamIdArray);
+            if (SelectFlashlightScreen.getEntries().length > 1) SelectFlashlightScreen.setValueIndex(1);
+
+            LogsScreen = (PreferenceScreen) findPreference("logs_screen");
+            if (LogsScreen != null) {
+                LogsScreen.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference preference) {
+                        new LoadLogsInfo().execute();
+                        return true;
+                    }
+                });
+
+            }
         }
     }
+
 
 
     @Override
@@ -78,7 +125,6 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
         LogsScreen = null;
         appList = null;
         setPreference = null;
-        dbHelper = null;
     }
 
     @Override
@@ -90,12 +136,18 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
             if (!key.endsWith("count")) str = str.concat(" ".concat(getString(R.string.msec)));
             pref.setSummary(str);
         } else if (pref instanceof PreferenceScreen) psSetEnDes(key);
+          else if (pref instanceof ListPreference)   pref.setSummary(((ListPreference) pref).getEntry());
     }
 
     private void psSetSummary(String key, String def, String ms) {
-        EditTextPreference etp = (EditTextPreference) findPreference(key);
-        if (etp != null)
-            etp.setSummary(getDefaultSharedPreferences(getContext()).getString(key, def).concat(ms));
+        if (key.endsWith("_list")) {
+            ListPreference lpr = (ListPreference) findPreference(key);
+            if (lpr != null) lpr.setSummary(lpr.getEntry());
+        } else {
+            EditTextPreference etp = (EditTextPreference) findPreference(key);
+            if (etp != null)
+                etp.setSummary(getDefaultSharedPreferences(getContext()).getString(key, def).concat(ms));
+        }
     }
 
     private void psSetEnDes(String key) {
@@ -104,6 +156,7 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
         psSetSummary(key.concat("_out"), "50", str);
         psSetSummary(key.concat("_count"), "10", "");
         psSetSummary(key.concat("_wait"), "1000", str);
+        psSetSummary(key.concat("_camera_id_list"), "-1", "");
     }
 
     @Override
@@ -112,7 +165,6 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
         psSetEnDes(setPreference);
         getDefaultSharedPreferences(getContext()).registerOnSharedPreferenceChangeListener(this);
     }
-
 
     @SuppressLint("StaticFieldLeak")
     private class LoadApplications extends AsyncTask<Void, Void, Void> {
@@ -130,6 +182,7 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
                     chb.setTitle(info.loadLabel(packageManager));
                     chb.setSummary(info.packageName);
                     chb.setIcon(info.loadIcon(packageManager));
+                    chb.setLayoutResource(R.layout.sw_p_l);
                     chb.setChecked(false);
                     SelectAppScreen.addPreference(chb);
                 }
@@ -152,6 +205,9 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
 
     @SuppressLint("StaticFieldLeak")
     private class LoadLogsInfo extends AsyncTask<Void, Void, Void> {
+        SqlHlp dbHelper = new SqlHlp(getContext());
+
+
         @Override
         protected Void doInBackground(Void... params) {
             List<ContentValues> logList = dbHelper.getRecord();
@@ -159,6 +215,7 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
                 Preference psc = new Preference(getContext());
                 psc.setTitle(cVal.getAsString("intent"));
                 psc.setSummary(cVal.getAsString("dta"));
+                psc.setLayoutResource(R.layout.im_p_l);
                 LogsScreen.addPreference(psc);
             }
             return null;
@@ -172,6 +229,10 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
         @Override
         protected void onPreExecute() {
             LogsScreen.removeAll();
+            Preference groups = new PreferenceCategory(getContext());
+            groups.setTitle(getString(R.string.group_logs));
+            groups.setLayoutResource(R.layout.gr_p_l);
+            LogsScreen.addPreference(groups);
             super.onPreExecute();
         }
     }

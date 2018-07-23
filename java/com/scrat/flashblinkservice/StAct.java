@@ -64,8 +64,6 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
         if (setPreference.equals("other_option")) {
             List<String> cameraName = new ArrayList<>();
             List<String> cameraId   = new ArrayList<>();
-            cameraName.add(getString(R.string.default_item));
-            cameraId.add("-1");
             CameraManager mCameraManager = Objects.requireNonNull((CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE));
             try {
                 for (String id : mCameraManager.getCameraIdList()) {
@@ -85,10 +83,11 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
             } catch (CameraAccessException e) {
                 e.printStackTrace();
             }
+            cameraName.add(getString(R.string.default_item));
+            cameraId.add("-1");
             ListPreference flashlight = (ListPreference) findPreference("other_option_camera_id_list");
             flashlight.setEntries(cameraName.toArray(new String[cameraName.size()]));
             flashlight.setEntryValues(cameraId.toArray(new String[cameraId.size()]));
-            if (flashlight.getEntries().length > 1) flashlight.setValueIndex(1);
 
             LogsScreen = (PreferenceScreen) findPreference("logs_screen");
             if (LogsScreen != null) {

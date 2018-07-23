@@ -66,11 +66,9 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
             List<String> cameraId   = new ArrayList<>();
             cameraName.add(getString(R.string.default_item));
             cameraId.add("-1");
-            CameraManager mCameraManager = (CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE);
-            assert mCameraManager != null;
+            CameraManager mCameraManager = Objects.requireNonNull((CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE));
             try {
-                String[] ids = mCameraManager.getCameraIdList();
-                for (String id : ids) {
+                for (String id : mCameraManager.getCameraIdList()) {
                     CameraCharacteristics c = mCameraManager.getCameraCharacteristics(id);
                     if (Objects.requireNonNull(c.get(FLASH_INFO_AVAILABLE))) {
                         cameraId.add(id);
@@ -87,15 +85,10 @@ public class StAct extends PreferenceFragment implements SharedPreferences.OnSha
             } catch (CameraAccessException e) {
                 e.printStackTrace();
             }
-
-            ListPreference SelectFlashlightScreen = (ListPreference) findPreference("other_option_camera_id_list");
-            String[] camNamesArray = new String[cameraName.size()];
-            camNamesArray = cameraName.toArray(camNamesArray);
-            String[] CamIdArray = new String[cameraId.size()];
-            CamIdArray = cameraId.toArray(CamIdArray);
-            SelectFlashlightScreen.setEntries(camNamesArray);
-            SelectFlashlightScreen.setEntryValues(CamIdArray);
-            if (SelectFlashlightScreen.getEntries().length > 1) SelectFlashlightScreen.setValueIndex(1);
+            ListPreference flashlight = (ListPreference) findPreference("other_option_camera_id_list");
+            flashlight.setEntries(cameraName.toArray(new String[cameraName.size()]));
+            flashlight.setEntryValues(cameraId.toArray(new String[cameraId.size()]));
+            if (flashlight.getEntries().length > 1) flashlight.setValueIndex(1);
 
             LogsScreen = (PreferenceScreen) findPreference("logs_screen");
             if (LogsScreen != null) {

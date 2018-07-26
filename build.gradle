@@ -6,8 +6,8 @@ android {
         applicationId "com.scrat.flashblinkservice"
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 4
-        versionName "1.80"
+        versionCode 5
+        versionName "1.85"
     }
     buildTypes {
         release {

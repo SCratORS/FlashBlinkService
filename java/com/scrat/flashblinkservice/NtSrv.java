@@ -17,17 +17,16 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
+import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 public class NtSrv extends AccessibilityService {
-    private SrCtrl isFaceDown;
-    private CameraManager mCameraManager;
-    private volatile Flashing flashing;
-    private boolean flashblink;
-    private boolean bat_lev;
-    private boolean acl_invert;
-    private int camId;
+    private Context mContext;
     private SqlHlp dbHelper;
+    private ThFlsh mFlashing;
+    private boolean bat_lev;
+    private int mCameraId;
+    private boolean mInvert;
 
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
         if (getValue(accessibilityEvent.getPackageName().toString(), false)) {
@@ -39,8 +38,7 @@ public class NtSrv extends AccessibilityService {
         }
     }
 
-    public void onInterrupt() {
-    }
+    public void onInterrupt() {}
 
     public void onDestroy() {
         super.onDestroy();
@@ -54,9 +52,11 @@ public class NtSrv extends AccessibilityService {
         return dateFormat.format(date);
     }
 
+
     public void onServiceConnected() {
-        isFaceDown = new SrCtrl(getApplicationContext());
-        dbHelper = new SqlHlp(getApplicationContext());
+        mContext = getApplicationContext();
+        dbHelper = new SqlHlp(mContext);
+        String cIntent = getValue("income_alarm_custom", "");
         IntentFilter intentFilters = new IntentFilter();
         intentFilters.addAction("android.intent.action.PHONE_STATE");
         intentFilters.addAction("android.provider.Telephony.SMS_RECEIVED");
@@ -75,6 +75,8 @@ public class NtSrv extends AccessibilityService {
 
         intentFilters.addAction("android.intent.action.BATTERY_LOW");
         intentFilters.addAction("android.intent.action.BATTERY_OKAY");
+
+        if (!cIntent.isEmpty()) intentFilters.addAction(cIntent);
         intentFilters.setPriority(0);
 
         registerReceiver(new BroadcastReceiver() {
@@ -89,93 +91,91 @@ public class NtSrv extends AccessibilityService {
                     if (phoneState.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
                         cVal.put("intent", cVal.getAsString("intent").concat(" (").concat(phoneState).concat(")"));
                         StartFlash("income_call");
-                    } else {
-                        flashblink = false;
-                        if (phoneState.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
-                            cVal.put("intent", cVal.getAsString("intent").concat(" (").concat(phoneState).concat(")"));
-                            StartFlash("income_miss");
-                        }
+                    }
+                    if (phoneState.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
+                        cVal.put("intent", cVal.getAsString("intent").concat(" (").concat(phoneState).concat(")"));
+                        StartFlash("income_miss");
                     }
                 } else if (intent.getAction().endsWith(".SMS_RECEIVED")) StartFlash("income_sms");
-                else if (intent.getAction().endsWith(".ALARM_ALERT")) StartFlash("income_alarm");
-                else bat_lev = intent.getAction().endsWith("LOW");
+                else if (intent.getAction().contains("BATTERY")) bat_lev = intent.getAction().endsWith("LOW");
+                else {
+                    if (getValue("income_alarm_custom", "").isEmpty()) setValue("income_alarm_custom", intent.getAction());
+                    StartFlash("income_alarm");
+                }
                 dbHelper.post(cVal);
             }
         }, intentFilters);
     }
 
-    private int getValue(String key, String def) {
-        return Integer.valueOf(getDefaultSharedPreferences(getApplicationContext()).getString(key, def));
+    private void setValue(String key, String value) {
+        getDefaultSharedPreferences(mContext).edit().putString(key,value).apply();
+    }
+
+    private int getValue(String key, int def) {
+        return Integer.valueOf(getDefaultSharedPreferences(mContext).getString(key, String.valueOf(def)));
     }
 
     private boolean getValue(String key, boolean def) {
-        return getDefaultSharedPreferences(getApplicationContext()).getBoolean(key, def);
+        return getDefaultSharedPreferences(mContext).getBoolean(key, def);
     }
 
-    private boolean FlashlightInitialized() {
-        mCameraManager = (CameraManager) getApplicationContext().getSystemService(Context.CAMERA_SERVICE);
-        return mCameraManager != null;
-    }
-
-    private boolean setFlashlight(boolean enabled) {
-        try {
-            if (mCameraManager != null) mCameraManager.setTorchMode(String.valueOf(camId), enabled);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private void CameraRelease() {
-        flashblink = false;
-        setFlashlight(false);
-        mCameraManager = null;
-        flashing = null;
-    }
-
-    private void destroy() {
-        CameraRelease();
-        isFaceDown.destroy();
+    private String getValue(String key, String def){
+        return String.valueOf(getDefaultSharedPreferences(mContext).getString(key, def));
     }
 
     private void StartFlash(String event) {
         if (getValue(event, false)) {
-            acl_invert = getValue("invert_mode", false);
-            camId = getValue("other_option_camera_id_list" , "-1");
-            if (camId < 0) return;
+            mCameraId = getValue("other_option_camera_id_list", -1);
+            if (mCameraId < 0) return;
+            mInvert = getValue("invert_mode", false);
             boolean battery = !getValue("safe_mode", true) || !bat_lev;
             int mHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
             boolean sleepTimes = !getValue("sleep_mode", true) || (5 < mHour && mHour < 23);
             if (battery && sleepTimes) {
                 Integer[] ArrayParam = new Integer[6];
-                ArrayParam[0] = getValue(event.concat("_in"), "25");
-                ArrayParam[1] = getValue(event.concat("_out"), "50");
+                ArrayParam[0] = getValue(event.concat("_in"), 25);
+                ArrayParam[1] = getValue(event.concat("_out"), 50);
                 ArrayParam[2] = getValue(event.concat("_strobe"), false) ? 1 : 0;
-                ArrayParam[3] = getValue(event.concat("_count"), "10");
-                ArrayParam[4] = getValue(event.concat("_wait"), "1000");
+                ArrayParam[3] = getValue(event.concat("_count"), 10);
+                ArrayParam[4] = getValue(event.concat("_wait"), 1000);
                 ArrayParam[5] = getValue(event.concat("_repeat"), true) ? 1 : 0;
-                if (flashing != null) flashing.SetParam((Integer[]) ArrayParam); else {
-                    flashing = new Flashing();
-                    flashing.execute((Integer[]) ArrayParam);
+                if (mFlashing != null) mFlashing.SetParam((Integer[]) ArrayParam); else {
+                    mFlashing = new ThFlsh(mContext);
+                    mFlashing.executeOnExecutor(THREAD_POOL_EXECUTOR, (Integer[]) ArrayParam);
                 }
             }
         }
     }
 
     @SuppressLint("StaticFieldLeak")
-    private class Flashing extends AsyncTask<Integer, Void, Void> {
+    class ThFlsh extends AsyncTask<Integer, Void, Void> {
         private long timeshtamp = System.currentTimeMillis();
         private Integer[] Scheme = new Integer[6];
+        private SrCtrl isFaceDown;
+        private CameraManager mCameraManager;
+
+        ThFlsh (Context context) {
+            isFaceDown = new SrCtrl(context);
+            mCameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+        }
 
         void SetParam(Integer... arrInteger) {
             timeshtamp = System.currentTimeMillis();
             Scheme = arrInteger;
-            isFaceDown.addWakeTime();
+        }
+
+        private boolean setFlashlight(boolean enabled) {
+            try {
+                mCameraManager.setTorchMode(String.valueOf(mCameraId), enabled);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
         }
 
         private void SleepTime(int t) {
             long setCurrentMillis = System.currentTimeMillis() + t;
-            while (!(isCancelled() || !flashblink) && (System.currentTimeMillis() < setCurrentMillis));
+            while ((System.currentTimeMillis() < setCurrentMillis) && isFaceDown.isFacedown(mInvert));
         }
 
         private void blink(int i, int o) {
@@ -184,23 +184,21 @@ public class NtSrv extends AccessibilityService {
         }
 
         private boolean isNotStopFlash() {
-            return !isCancelled() && flashblink && System.currentTimeMillis() < timeshtamp + 300000;
+            return System.currentTimeMillis() < timeshtamp + 300000 && isFaceDown.isFacedown(mInvert);
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            flashblink = FlashlightInitialized();
         }
 
         @Override
         protected Void doInBackground(Integer... arrInteger) {
             Scheme = arrInteger;
-            while (isNotStopFlash() && isFaceDown.isFacedown(acl_invert)) {
+            while (isNotStopFlash()) {
                 if (Scheme[2] != 0) {
                     for (int i = 0; i < Scheme[3]; i++) {
-                        if (isNotStopFlash()) blink(Scheme[0], Scheme[1]);
-                        else return null;
+                        if (isNotStopFlash()) blink(Scheme[0], Scheme[1]); else return null;
                     }
                     if (isNotStopFlash()) SleepTime(Scheme[4]);
                 } else blink(Scheme[0], Scheme[1]);
@@ -217,9 +215,12 @@ public class NtSrv extends AccessibilityService {
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
-            destroy();
+            isFaceDown.destroy();
+            setFlashlight(false);
+            mFlashing = null;
         }
 
     }
 
 }
+

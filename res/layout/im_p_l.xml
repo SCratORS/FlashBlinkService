@@ -13,8 +13,8 @@
 
     <ImageView
         android:id="@android:id/icon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:layout_marginEnd="10dp"
         tools:ignore="ContentDescription" />
 
@@ -40,5 +40,9 @@
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="12sp" />
     </LinearLayout>
-
+    <ImageView
+        android:layout_width="32dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_arr"
+        tools:ignore="ContentDescription" />
 </LinearLayout>

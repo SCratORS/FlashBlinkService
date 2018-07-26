@@ -6,6 +6,14 @@
         android:key="income_alarm"
         android:layout="@layout/sw_p_l"
         android:title="@string/incomealarm" />
+    <EditTextPreference
+        android:dependency="income_alarm"
+        android:dialogTitle="@string/custom_intent_caption"
+        android:dialogMessage="@string/custom_intent_message"
+        android:inputType="text"
+        android:key="income_alarm_custom"
+        android:layout="@layout/im_p_l"
+        android:title="@string/custom_intent" />
     <PreferenceCategory android:title="@string/group" android:layout="@layout/gr_p_l"/>
     <EditTextPreference
         android:defaultValue="300"

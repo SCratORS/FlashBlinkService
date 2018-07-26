@@ -21,6 +21,7 @@ class SrCtrl implements SensorEventListener {
     private Looper mHandlerLooper;
     private boolean faceDown;
     private boolean invert;
+    private volatile boolean init;
 
     SrCtrl(Context cntx) {
         context = cntx;
@@ -36,7 +37,6 @@ class SrCtrl implements SensorEventListener {
     }
 
     private synchronized void destroySrLisner() {
-        if (wl != null) wl.release();
         wl = null;
         if (sensorManager != null) sensorManager.unregisterListener(this);
         sensorManager = null;
@@ -46,29 +46,22 @@ class SrCtrl implements SensorEventListener {
         mHandler = null;
     }
 
-    public void addWakeTime() {
-        if (wl != null)  wl.acquire(300 * 1000L /*5 minutes*/);
-    }
-
     private void initialized_sensor() {
         ensureHandler();
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        assert sensorManager != null;
-        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL, mHandler);
+        sensorManager.registerListener(this, Objects.requireNonNull(sensorManager).getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL, mHandler);
     }
 
     boolean isFacedown(boolean Invert) {
         invert = Invert;
         if (mHandler != null) return faceDown;
         else {
+            init = false;
             PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            assert pm != null;
             wl = Objects.requireNonNull(pm).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-            addWakeTime();
+            wl.acquire(300 * 1000L /*5 minutes*/);
             initialized_sensor();
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException ignored) { }
+            while (!init);
             return faceDown;
         }
     }
@@ -78,7 +71,10 @@ class SrCtrl implements SensorEventListener {
     }
 
     @Override
-    public void onSensorChanged(SensorEvent sensorEvent) { faceDown = sensorEvent.values[2] < 0 != invert; }
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        faceDown = sensorEvent.values[2] < 0 != invert;
+        init = true;
+    }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {

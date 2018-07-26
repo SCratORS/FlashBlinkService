@@ -27,4 +27,5 @@ public class StHead extends PreferenceActivity {
     public void onBuildHeaders(List<Header> target) {
         loadHeadersFromResource(R.xml.head, target);
     }
+
 }

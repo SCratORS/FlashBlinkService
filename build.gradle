@@ -1,13 +1,12 @@
 apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
-    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "com.scrat.flashblinkservice"
-        minSdkVersion 23
+        minSdkVersion 26
         targetSdkVersion 28
-        versionCode 5
-        versionName "1.85"
+        versionCode 8
+        versionName "1.9"
     }
     buildTypes {
         release {

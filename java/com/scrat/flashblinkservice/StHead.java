@@ -12,10 +12,13 @@ public class StHead extends PreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (checkSelfPermission(Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED)
-            requestPermissions(new String[]{Manifest.permission.RECEIVE_SMS}, 0);
-        if (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED)
-            requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, 0);
+        if  ((checkSelfPermission(Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) ||
+                (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) ||
+                (checkSelfPermission(Manifest.permission.WAKE_LOCK) != PackageManager.PERMISSION_GRANTED))
+            requestPermissions (new String[]{
+                    Manifest.permission.RECEIVE_SMS,
+                    Manifest.permission.READ_PHONE_STATE,
+                    Manifest.permission.WAKE_LOCK}, 1);
     }
 
     @Override

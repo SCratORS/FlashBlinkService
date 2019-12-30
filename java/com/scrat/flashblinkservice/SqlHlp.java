@@ -10,8 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 class SqlHlp extends SQLiteOpenHelper {
+
     SqlHlp(Context context) {
-        super(context, "logsDB", null, 1);
+        super(context, "DB", null, 1);
     }
 
     @Override
@@ -26,7 +27,7 @@ class SqlHlp extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     }
 
-    public void post(ContentValues cVal) {
+    void post(ContentValues cVal) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.query("logsTable", null, null, null, null, null, null);
         if (c.moveToFirst() && (c.getCount() > 50)) db.delete("logsTable", "id="+c.getInt(c.getColumnIndex("id")), null);
@@ -35,7 +36,7 @@ class SqlHlp extends SQLiteOpenHelper {
         db.close();
     }
 
-    public List<ContentValues> getRecord() {
+    List<ContentValues> getRecord() {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues cVal;
         List<ContentValues> list = new ArrayList<>();

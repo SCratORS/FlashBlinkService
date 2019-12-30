@@ -1,5 +1,6 @@
 package com.scrat.flashblinkservice;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -37,6 +38,7 @@ class SrCtrl implements SensorEventListener {
     }
 
     private synchronized void destroySrLisner() {
+        wl.release();
         wl = null;
         if (sensorManager != null) sensorManager.unregisterListener(this);
         sensorManager = null;
@@ -52,6 +54,7 @@ class SrCtrl implements SensorEventListener {
         sensorManager.registerListener(this, Objects.requireNonNull(sensorManager).getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL, mHandler);
     }
 
+    @SuppressLint({"InvalidWakeLockTag", "WakelockTimeout"})
     boolean isFacedown(boolean Invert) {
         invert = Invert;
         if (mHandler != null) return faceDown;
@@ -59,7 +62,7 @@ class SrCtrl implements SensorEventListener {
             init = false;
             PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
             wl = Objects.requireNonNull(pm).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-            wl.acquire(300 * 1000L /*5 minutes*/);
+            wl.acquire();
             initialized_sensor();
             while (!init);
             return faceDown;

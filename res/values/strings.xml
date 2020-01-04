@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FlashBlinkService</string>
+    <string name="accessibility_service_description">A service that launches a device flash when different notifications occur. This software is OpenSources and is distributed under the GPL-3.0 license. The source code is available at https://github.com/SCratORS/FlashBlinkService</string>
+    <string name="incomecall">Incoming calls</string>
+    <string name="incomesms">Incoming messages</string>
+    <string name="incomeapp">App notifications</string>
+    <string name="select_incomeapp">Select application</string>
+    <string name="sleep_mode">Do not disturb</string>
+    <string name="sleep_mode_summary">Do not activate the flash at night from 11.00PM to 6.00AM</string>
+    <string name="safe_mode">Battery saving</string>
+    <string name="safe_mode_summary">Do not activate the flash when the Battery is low</string>
+    <string name="incomealarm">Alarm</string>
+    <string name="duration">Duration</string>
+    <string name="pause_flash">Delay</string>
+    <string name="load_app_info">Loading information about the applications</string>
+    <string name="strobe_check">Pause between flashes</string>
+    <string name="strobe_count">Count flashes</string>
+    <string name="misscall">Missed calls</string>
+    <string name="group_general">Other options</string>
+    <string name="group">Flash settings</string>
+    <string name="group_app">Installed applications</string>
+    <string name="msec">msec.</string>
+    <string name="repeat_check">Repeat the series of flashes</string>
+    <string name="logs">Notification log</string>
+    <string name="group_logs">Recent Notifications</string>
+    <string name="default_item">Not use flashlight</string>
+    <string name="front_flashlight">Front camera</string>
+    <string name="back_flashlight">Back camera</string>
+    <string name="external_flashlight">External camera</string>
+    <string name="flash_title">Flashlight</string>
+    <string name="invert_mode">Inverting Accelerometer</string>
+    <string name="invert_mode_summary">Phone is facing down or up</string>
+    <string name="flash_group">Changing the flash setting</string>
+    <string name="load_log_info">Loading the Notification Log</string>
+</resources>
